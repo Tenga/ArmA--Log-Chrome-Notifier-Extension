@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+
+	<title>ArmA::log - Beta Patch Notifier Options</title>
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<style>
+		#main_row {
+			background-image: url('/img/extension_bar_bg.png');
+			border-radius: 8px;
+			color: #FFF;
+			font-weight: bold;
+			font-size: 20px;
+		}
+
+		#main_row img {
+			margin-top: 5px;
+			vertical-align: -13px;
+			width: 122px;
+			height: 39px;
+		}
+	</style>
+</head>
+
+<body style="padding-top: 60px" onload="load_options()">
+	
+
+	<div id="main_container" class="container">
+		<header id="main_row" class="row">
+			<div class="span16">
+				<img src="/img/extension_logo.png" class="arma_logo_small"/> beta patch notifier options
+			</div>
+		</header>
+
+		<div class="row" style="padding-top: 20px">
+			<div class="span16">
+				Check for new betas every <input id="updateInterval" type="number" style="width: 40px" min="5" /> minutes.
+
+				<br><br>
+				<button class="btn primary" style="margin-right: 20px;" onclick="save_options()">Save changes</button><a href="#" onclick="restore_defaults();">Restore defaults</a>
+			</div>
+		</div>
+	</div>
+	<script>
+		var updateInterval = localStorage.getItem('updateInterval'),
+		$updateInterval = document.getElementById("updateInterval");
+
+		function save_options() {
+			var newInterval = parseInt($updateInterval.value, 10);
+			if(!isNaN(newInterval) && newInterval >= 5) {
+				localStorage.setItem('updateInterval', parseInt($updateInterval.value));
+				chrome.extension.sendRequest('options_updated');
+			} else {
+				$updateInterval.value = localStorage.getItem('updateInterval');
+			}
+		}
+
+		function load_options() {
+			$updateInterval.value = updateInterval;
+		}
+
+		function restore_defaults() {
+			$updateInterval.value = 10;
+			localStorage.setItem('updateInterval', 10);
+			chrome.extension.sendRequest('options_updated');
+		}
+
+	</script>
+</body>
+</html>

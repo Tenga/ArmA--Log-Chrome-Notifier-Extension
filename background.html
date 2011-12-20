@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<script>
+	var updateInterval = localStorage.getItem('updateInterval'),
+	lastCheckTime = localStorage.getItem('lastCheckTime'),
+	minInterval = 5, // Minutes
+	updateRepeater;
+
+	if(!updateInterval) localStorage.setItem('updateInterval', 10); // Minutes
+
+	function getLiveInfo() {
+		var timeDiff = (getTimestamp() - lastCheckTime);
+
+		if(timeDiff > (minInterval * 60)) {
+			localStorage.setItem('lastCheckTime', getTimestamp());
+			
+			xhr = new XMLHttpRequest();
+			xhr.open('GET', 'http://armalog.phpfogapp.com/main/extension_feed');
+			xhr.onload = processBuildInfo;
+			xhr.send();
+		}
+	}
+
+	function processBuildInfo() {
+		var res = JSON.parse(xhr.responseText),
+		lastKnownBuild = localStorage.getItem('lastKnownBuild'),
+		lastBuildTime = localStorage.getItem('lastBuildTime');
+		lastCheckTime = localStorage.getItem('lastCheckTime');
+
+		console.log('XHR:', res);
+
+		// If there is no know builds, set the to the one just recieved
+		if(!lastKnownBuild) localStorage.setItem('lastKnownBuild', res.build);
+		if(!lastBuildTime) localStorage.setItem('lastBuildTime', res.time);
+
+		// If there's a new build, show a notification
+		if(parseInt(res.time, 10) > parseInt(lastBuildTime, 10)) {
+			// Update stored build info to the new build data
+			localStorage.setItem('lastKnownBuild', res.build);
+			localStorage.setItem('lastBuildTime', res.time);
+
+			newBuildNotify(res.build);
+		}
+	}
+
+	function newBuildNotify(build) {
+		var notification = webkitNotifications.createHTMLNotification("notification.html");
+		notification.show(); 
+	}
+
+	function getTimestamp() {
+		return Math.floor(new Date().getTime() / 1000);
+	}
+
+	function pollingLoop(){
+		getLiveInfo();
+		console.log('Polled at', new Date().toString());
+		console.log('Polling interval:', localStorage.getItem('updateInterval'));
+		updateRepeater = setTimeout(pollingLoop, (1000 * 60) * localStorage.getItem('updateInterval'));
+	}
+
+	chrome.extension.onRequest.addListener(function(request, sender) {
+		if(request == 'options_updated') {
+			console.log('Updating polling loop...');
+			clearTimeout(updateRepeater);
+			updateRepeater = setTimeout(pollingLoop, (1000 * 60) * localStorage.getItem('updateInterval'));
+		}
+	});
+
+	pollingLoop();
+</script>
+</html>

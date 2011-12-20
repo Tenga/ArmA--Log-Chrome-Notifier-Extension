@@ -1,0 +1,17 @@
+{
+  "name": "ArmA::log - Beta Patch Notifier",
+  "version": "1.0.0",
+  "description": "This extension notifies you about new beta builds for ArmA.",
+  "options_page": "options.html",
+  "offline_enabled" : false,
+  "homepage_url" :"http://armalog.phpfogapp.com/",
+  "background_page": "background.html",
+  "icons": { "16": "icon16.png",
+             "48": "icon48.png",
+             "128": "icon128.png" },
+  "permissions": [
+  	"notifications",
+  	"background",
+    "http://armalog.phpfogapp.com/"
+  ]
+}
