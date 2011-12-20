@@ -27,8 +27,6 @@
 		lastBuildTime = localStorage.getItem('lastBuildTime');
 		lastCheckTime = localStorage.getItem('lastCheckTime');
 
-		console.log('XHR:', res);
-
 		// If there is no know builds, set the to the one just recieved
 		if(!lastKnownBuild) localStorage.setItem('lastKnownBuild', res.build);
 		if(!lastBuildTime) localStorage.setItem('lastBuildTime', res.time);
@@ -54,14 +52,11 @@
 
 	function pollingLoop(){
 		getLiveInfo();
-		console.log('Polled at', new Date().toString());
-		console.log('Polling interval:', localStorage.getItem('updateInterval'));
 		updateRepeater = setTimeout(pollingLoop, (1000 * 60) * localStorage.getItem('updateInterval'));
 	}
 
 	chrome.extension.onRequest.addListener(function(request, sender) {
 		if(request == 'options_updated') {
-			console.log('Updating polling loop...');
 			clearTimeout(updateRepeater);
 			updateRepeater = setTimeout(pollingLoop, (1000 * 60) * localStorage.getItem('updateInterval'));
 		}
